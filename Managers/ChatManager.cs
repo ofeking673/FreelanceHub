@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 
 namespace AlexProject.Managers
 {
-    internal class ChatManager
-    {
+    public class ChatManager    {
         public List<Chat> Chats { get; set; }
 
         //will add more functions to actually use this.

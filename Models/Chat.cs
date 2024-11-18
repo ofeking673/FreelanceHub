@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace AlexProject.Models
 {
-    internal class Chat
-    {
-        public List<Message> Messages { get; set; }
-        public User User { get; set; }
-        public User Seller { get; set; }
-    }
+        public class Chat : BaseModel
+        {
+            public List<Message> Messages { get; set; }
+            public int UserId { get; set; }
+            public int SellerId { get; set; }
+            public int jobId {  get; set; }
+        }
 }

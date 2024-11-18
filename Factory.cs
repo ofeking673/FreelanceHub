@@ -7,8 +7,7 @@ using AlexProject.Managers;
 
 namespace AlexProject
 {
-    internal class Factory
-    {
+    public class Factory    {
         public ChatManager ChatManager {  get; set; }
         public JobManager JobManager { get; set; }
         public OfferManager OfferManager { get; set; }

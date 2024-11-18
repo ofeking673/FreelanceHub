@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace AlexProject.Managers
 {
-    internal class OfferManager
-    {
-        public List<Offers> offers { get; set; }
+    public class OfferManager    {
+        public List<Offer> offers { get; set; }
 
         //will add more functionality later
     }

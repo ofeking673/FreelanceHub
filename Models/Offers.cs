@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace AlexProject.Models
 {
-    internal class Offers
-    {
-        public int Id { get; set; }
-        public Job offeredJob { get; set; }
-        public User OfferingUser { get; set; }
+    public class Offer : BaseModel    {
+        public int userId { get; set; }
+        public int sellerId { get; set; }
         public int newPrice { get; set; }
+        public int chatId {  get; set; }
+        public int jobId {  get; set; }
 
     }
 }

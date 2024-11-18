@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace AlexProject.Models
 {
-    public class Log : BaseModel    {
-        public DateTime Time { get; set; }
-        public string path { get; set; }
+    public class BaseModel {
+        public int Id { get; set; }
     }
 }

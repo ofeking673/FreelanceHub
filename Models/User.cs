@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace AlexProject.Models
 {
-    internal class User
-    {
+    public class User : BaseModel    {
         public string Username { get; set; }
-        public string Password { get; set; }
+        public string PasswordHash { get; set; }
         public string Email { get; set; }
-        public int Id { get; set; }
         public string ProfilePictureLink { get; set; }
 
     }

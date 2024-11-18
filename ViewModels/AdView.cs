@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlexProject.Managers
+namespace AlexProject.ViewModels
 {
-    public class JobManager    {
-        public List<Job> Jobs { get; set; }
-        //will add more functionality later
+    public class AdView
+    {
+        Ad ad { get; set; }
     }
 }
