@@ -1,13 +1,15 @@
-﻿namespace WebApplication2.ModelCreators
+﻿using WebApplication2.Repositories;
+
+namespace WebApplication2.ModelCreators
 {
     public class ModelFactory
     {
-        public chatCreator chatCreator;
-        public UserCreator userCreator;
-        public MessageCreator messageCreator;
-        public JobCreator jobCreator;
-        public LogCreator logCreator;
-        public OfferCreator offerCreator;
+        public chatRepository chatCreator;
+        public UserRespository userCreator;
+        public messageRepository messageCreator;
+        public JobRepository jobCreator;
+        public LogRepository logCreator;
+        public OfferRepository offerCreator;
         public ModelFactory() { }
 
     }
