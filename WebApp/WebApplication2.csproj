@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Desktop\AlexProject\AlexProject.csproj" />
     <ProjectReference Include="..\AlexProject\AlexProject.csproj" />
   </ItemGroup>
 
