@@ -59,7 +59,7 @@ namespace WebApplication2.Repositories
             dbContext.clearParams();
             return res == 1;
         }
-        public bool Delete(string ID)
+        public bool Delete(string ID)   
         {
             string sql = $@"DELETE FROM USER WHERE ID=@ID";
             dbContext.addParameter("@ID", ID);

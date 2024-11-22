@@ -9,7 +9,7 @@ namespace WebApplication2.DBActions
     public class DBConnection : IDBConnection
     {
         private SQLiteConnection conn;
-        SQLiteCommand cmd;
+        SQLiteCommand cmd = new SQLiteCommand();
         private string connectionStr { get; set; }
         private SQLiteTransaction transaction;
 

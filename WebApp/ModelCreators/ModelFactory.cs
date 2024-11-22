@@ -1,4 +1,5 @@
 ﻿using WebApplication2.Repositories;
+using WebApplication2.DBActions;
 
 namespace WebApplication2.ModelCreators
 {
@@ -10,7 +11,8 @@ namespace WebApplication2.ModelCreators
         public JobRepository jobCreator;
         public LogRepository logCreator;
         public OfferRepository offerCreator;
-        public ModelFactory() { }
+        public DBConnection dbConnection;
+        public ModelFactory() { dbConnection = DBConnection.getInstance(); }
 
     }
 }
