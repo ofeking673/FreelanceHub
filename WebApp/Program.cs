@@ -6,12 +6,14 @@ namespace WebApplication2
         {
             var builder = WebApplication.CreateBuilder(args);
 
+          
             // Add services to the container.
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddRazorPages(); //<--This line
 
             var app = builder.Build();
 
@@ -28,6 +30,8 @@ namespace WebApplication2
 
             app.MapControllers();
 
+            app.MapControllerRoute(name: "default",
+                pattern: "{controller=AdsController}/{action=GetAdHub}");
             app.Run();
 
         }

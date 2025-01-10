@@ -1,0 +1,309 @@
+﻿@using AlexProject.ViewModels;
+@model AdHub;
+
+@{
+    ViewData["Title"] = "GetAdHub";
+}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freelance Hub - Find Your Next Job</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+            header h1 {
+                margin: 0;
+                font-size: 2rem;
+            }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .search-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+            .search-bar input[type="text"] {
+                width: 70%;
+                padding: 10px;
+                font-size: 1rem;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+            .search-bar select {
+                padding: 10px;
+                font-size: 1rem;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+        .job-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .job-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+            .job-card:hover {
+                transform: scale(1.02);
+            }
+
+            .job-card h3 {
+                margin: 0;
+                font-size: 1.2rem;
+                color: #34495e;
+            }
+
+            .job-card p {
+                margin: 10px 0;
+                color: #7f8c8d;
+                font-size: 0.9rem;
+            }
+
+            .job-card button {
+                padding: 10px 15px;
+                background-color: #3498db;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+
+                .job-card button:hover {
+                    background-color: #2980b9;
+                }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .modal-content button {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .modal-content button:hover {
+            background-color: #2980b9;
+        }
+
+        .pagination {
+            text-align: center;
+            margin-top: 20px;
+            display: flex;
+            position: absolute;
+            left:42%;
+        }
+
+            .pagination button {
+                padding: 10px 15px;
+                width: 80px;
+                margin: 0 5px;
+                border: none;
+                background-color: #3498db;
+                color: white;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+
+                .pagination button:hover {
+                    background-color: #2980b9;
+                }
+
+                .pagination button[disabled] {
+                    background-color: #ccc;
+                    cursor: not-allowed;
+                }
+    </style>
+</head>
+<body>
+    <header>
+        <img src= "~/logo.png">
+    </header>
+
+    <div class="container">
+        <div class="search-bar">
+            <input type="text" placeholder="Search for jobs or services...">
+            <select>
+                <option value="all">All Categories</option>
+                <option value="writing">Writing</option>
+                <option value="design">Design</option>
+                <option value="programming">Programming</option>
+                <option value="marketing">Marketing</option>
+            </select>
+        </div>
+
+        <div class="job-list">
+            <p class="error" hidden></p>
+        </div>
+
+        
+
+        <div class="pagination">
+            <button disabled onclick="changePageNumber(false)">Previous</button>
+            <h3 id="pageHeader">Page 1</h3>
+            <button onclick="changePageNumber(true)" data-page=1 id="pageContainer">Next</button>
+        </div>
+    </div>
+    <script>
+        async function fetchJobs() {
+            try {
+                var page = document.getElementById("pageContainer").getAttribute("data-page");
+                console.log(page);
+                // Make an API call to fetch job data
+                console.log('/api/Guest/getAds?Theme=@Model.sortingTheme.ToString()&Page=' + page);
+                const response = await fetch('/api/Guest/getAds?Theme=@Model.sortingTheme.ToString()&Page=' + page);
+                const data = await response.json();
+
+                // Check if adList exists and is an array
+                if (data && Array.isArray(data.adList) && data.adList.length > 0) {
+                    const jobList = document.getElementsByClassName('job-list')[0];
+                    jobList.innerHTML = '';
+                    console.log(data.adList);
+                    // Loop through the adList and create HTML for each job
+                    data.adList.forEach(job => {
+                        const jobCard = document.createElement('div');
+                        jobCard.classList.add('job-card');
+                        jobCard.innerHTML = `
+                                                            <h3>${job.name}</h3>
+                                                            <p><strong>Price:</strong> $${job.price}</p>
+                                                            <p><strong>Description:</strong> ${job.description}</p>
+                                                            <button onclick="openModal('${job.name}')">Make an Offer</button>
+                                                        `;
+                        jobList.appendChild(jobCard); // Add the job card to the list
+                    });
+                }
+                else {
+                    console.log("nuh uh");
+                    // Handle case where no jobs are returned
+                    const errorMsg = document.getElementsByClassName('error');
+                    errorMsg.content = 'No jobs available at the moment.';
+                    errorMsg.hidden = false;
+                }
+            } catch (error) {
+                console.error('Error fetching jobs:', error);
+            }
+        }
+
+        // Call fetchJobs once to load jobs initially
+        fetchJobs();
+
+        // Set an interval to update the job list every 5 minutes (300000ms)
+        setInterval(fetchJobs, 300000, @Model.Page);
+    </script>
+    <div class="modal" id="offerModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Make an Offer</h3>
+            <input type="number" placeholder="Your Offer Price" id="offerPrice">
+            <button onclick="sendOffer()">Submit Offer</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+    <script>
+        function changePageNumber(inc) {
+            var container = document.getElementById("pageContainer");
+            var currentPage = parseInt(container.getAttribute("data-page"), 10);
+            var newPage = currentPage + (inc ? 1 : -1);
+
+            // Update the data-page attribute
+            container.setAttribute("data-page", newPage);
+
+            // Update the page header
+            var ele = document.getElementById("pageHeader");
+            ele.textContent = "Page " + newPage;
+
+            // Enable or disable the Previous button
+            var prevButton = document.querySelector('button[onclick="changePageNumber(false)"]');
+            prevButton.disabled = newPage <= 1;
+
+            fetchJobs();
+        }
+
+    </script>
+    <script>
+        const modal = document.getElementById('offerModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const offerPrice = document.getElementById('offerPrice');
+
+        function openModal(jobTitle) {
+            modalTitle.textContent = `Make an Offer for ${jobTitle}`;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            offerPrice.value = '';
+        }
+
+        function sendOffer() {
+            const price = offerPrice.value;
+            if (price) {
+                alert(`Your offer of $${price} has been sent!`);
+                closeModal();
+            } else {
+                alert('Please enter a valid offer price.');
+            }
+        }
+    </script>
+</body>
+
+

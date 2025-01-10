@@ -30,8 +30,8 @@ namespace WebApplication2.ModelCreators
                 chatId = Convert.ToString(src["CHAT_ID"]),
                 Author = Convert.ToString(src["AUTHOR_ID"]),
                 Content = Convert.ToString(src["CONTENT"]),
-                timeStamp = Convert.ToDateTime(src["TIMESTAMP"]),
-                Destination = Convert.ToString(src["DEST_USER_ID"])
+                Destination = Convert.ToString(src["DEST_USER_ID"]),
+                timeStamp = Convert.ToDateTime(src["TIMESTAMP"])
             };
             return message;
         }
@@ -43,6 +43,7 @@ namespace WebApplication2.ModelCreators
         {
             Job job = new Job()
             {
+                Name = Convert.ToString(src["NAME"]),
                 Id = Convert.ToInt16(src["ID"]),
                 UserId = Convert.ToString(src["CREATOR_ID"]),
                 price = Convert.ToString(src["PRICE"]),
@@ -56,7 +57,7 @@ namespace WebApplication2.ModelCreators
             }
             else
             {
-                job.Theme = Theme.Teaching;
+                job.Theme = Theme.None;
             }
 
             return job;

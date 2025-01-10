@@ -1,7 +1,9 @@
 ﻿using AlexProject.Models;
+using System.Data;
 using System.Data.Entity;
 using System.Data.SqlTypes;
 using System.Diagnostics.Metrics;
+using System.Reflection.PortableExecutable;
 using WebApplication2.ModelCreators;
 
 namespace WebApplication2.Repositories
@@ -29,10 +31,26 @@ namespace WebApplication2.Repositories
         public User GetById(string id) {
             string sql = @$"SELECT * FROM USER WHERE ID=@ID";
             dbContext.addParameter("@ID", id);
-            var res = dbContext.Read(sql);
-            dbContext.clearParams();
-            return UserCreator.CreateModel(res);
+            using(var res = dbContext.Read(sql))
+            {
+                res.Read();
+                dbContext.clearParams();
+                return UserCreator.CreateModel(res);
+            }
         }
+
+        public User GetByUserAndPassword(string username, string password)
+        {
+            string sql = @"SELECT * FROM USER WHERE USERNAME=@user AND PASSWORD=@pass";
+            dbContext.addParameter("@user", username);
+            dbContext.addParameter("@pass", password);
+            using (var res = dbContext.Read(sql)) {
+                res.Read();
+                dbContext.clearParams();
+                return UserCreator.CreateModel(res);
+            }
+        }
+
         public string GetLastID() {
             string sql = @$"SELECT ID FROM USER ORDER BY ID ORD DESC LIMIT 1";
             return Convert.ToString(dbContext.Read(sql)[0]);
@@ -67,6 +85,18 @@ namespace WebApplication2.Repositories
             dbContext.clearParams();
             return save == 1;
         }
+
+        public bool changePassword(string ID, string password, string newPass)
+        {
+            User user = GetById(ID);
+            string pwd = ModelFactory.GetStringSha256Hash(password);
+            if(pwd == user.PasswordHash)
+            {
+                user.PasswordHash = ModelFactory.GetStringSha256Hash(newPass);
+                return Update(user);
+            }
+            return false;
+        }
     }
 
     public class JobRepository : Repository, IRepository<Job>
@@ -91,21 +121,57 @@ namespace WebApplication2.Repositories
         public Job GetById(string id) {
             string sql = @"SELECT * FROM JOBS WHERE ID=@ID";
             dbContext.addParameter("@ID", id);
-            var res = dbContext.Read(sql);
-            dbContext.clearParams();
-            return JobCreator.CreateModel(res);
+            using(var res = dbContext.Read(sql))
+            {
+                res.Read();
+                dbContext.clearParams();
+                return JobCreator.CreateModel(res);
+            }
+        }
+        public List<Job> getByCreatorId(string id)
+        {
+            List<Job> results = new List<Job>();
+            string sql = @"SELECT * FROM JOBS WHERE CREATOR_ID=@id";
+            dbContext.addParameter("@id", id);
+            using(var res = dbContext.Read(sql))
+            {
+                dbContext.clearParams();
+                while (res.Read())
+                {
+                    results.Add(JobCreator.CreateModel(res));
+                }
+                return results;
+            }
+        }
+        public List<Job> GetByTheme(Theme theme)
+        {
+            if(theme == Theme.None)
+            {
+                return GetAll();
+            }
+            List<Job> res = new List<Job>();
+            List<Job> allJobs = GetAll();
+            foreach (var job in allJobs) {
+                if(job.Theme == theme)
+                {
+                    res.Add(job);
+                }
+            }
+
+            return res;
         }
         public string GetLastID() {
             string sql = @"SELECT ID FROM JOBS ORDER BY ID ORD DESC LIMIT 1";
-            var res = dbContext.Read(sql);
-            return Convert.ToString(res[0]);
+            using(var res = dbContext.Read(sql))
+            {  res.Read(); return Convert.ToString(res[0]);}
         }
         public bool Create(Job job) {
-            string sql = @"INSERT INTO JOBS(CREATOR_ID, PRICE, THEME, DESCRIPTION) VALUES(@creator, @price, @theme, @desc)";
+            string sql = @"INSERT INTO JOBS(NAME, CREATOR_ID, PRICE, THEME, DESCRIPTION) VALUES(@name, @creator, @price, @theme, @desc)";
             dbContext.addParameter("@creator", job.UserId);
             dbContext.addParameter("@price", job.price);
             dbContext.addParameter("@theme", Convert.ToString(job.Theme));
             dbContext.addParameter("@desc", job.Description);
+            dbContext.addParameter("@name", job.Name);
             var res = dbContext.create(sql);
             dbContext.clearParams();
             return res == 1;
@@ -152,13 +218,34 @@ namespace WebApplication2.Repositories
         public Chat GetById(string id) {
             string sql = @"SELECT * FROM CHAT WHERE ID=@ID";
             dbContext.addParameter("@ID", id);
-            var save = dbContext.Read(sql);
-            return chatCreator.CreateModel(save);
+            using(var reader = dbContext.Read(sql))
+            {
+                reader.Read();
+                dbContext.clearParams();
+                return chatCreator.CreateModel(reader);
+            }
         }
+
+        public Chat getByJobIdUserId(string jobId, string userId)
+        {
+            string sql = @"SELECT * FROM CHAT WHERE JOB_ID=@job AND USER_ID=@user";
+            dbContext.addParameter("@job", jobId);
+            dbContext.addParameter("@user", userId);
+            using (var reader = dbContext.Read(sql))
+            {
+                reader.Read();
+                dbContext.clearParams();
+                return chatCreator.CreateModel(reader);
+            }
+        }
+
         public string GetLastID() {
             string sql = @"SELECT ID FROM CHAT ORDER BY ID ORD DESC LIMIT 1";
-            var res = dbContext.Read(sql);
-            return Convert.ToString(res[0]);
+            using(var res = dbContext.Read(sql))
+            {
+                res.Read();
+                return Convert.ToString(res[0]);
+            }
         }
         public bool Create(Chat chat) {
             string sql = @"INSERT INTO CHAT(SELLER_ID, USER_ID, JOB_ID) VALUES(@creator, @user, @job)";
@@ -209,17 +296,32 @@ namespace WebApplication2.Repositories
             }
             return results;
         }
+        public List<Message> GetAllInChat(int chat_id)
+        {
+            var results = new List<Message>();
+            foreach(var msg in GetAll())
+            {
+                if(msg.chatId == chat_id.ToString())
+                {
+                    results.Add(msg);
+                }
+            }
+            return results;
+        }
         public Message GetById(string id) {
             string sql = @"SELECT * FROM MESSAGE WHERE ID=@ID";
             dbContext.addParameter("@ID", id);
-            var res = dbContext.Read(sql);
-            dbContext.clearParams();
-            return MessageCreator.CreateModel(res);
+            using (var res = dbContext.Read(sql))
+            {
+                res.Read();
+                dbContext.clearParams();
+                return MessageCreator.CreateModel(res);
+            }
         }
         public string GetLastID() {
             string sql = @"SELECT ID FROM MESSAGE ORDER BY ID ORD DESC LIMIT 1";
-            var res = dbContext.Read(sql);
-            return Convert.ToString(res[0]);
+            using (var res = dbContext.Read(sql))
+            { res.Read(); return Convert.ToString(res[0]); }
         }
         public bool Create(Message model)
         {
@@ -278,14 +380,17 @@ namespace WebApplication2.Repositories
         public Log GetById(string id) {
             string sql = @"SELECT * FROM LOGS WHERE ID=@ID";
             dbContext.addParameter("@ID", id);
-            var res = dbContext.Read(sql);
-            dbContext.clearParams();
-            return LogCreator.CreateModel(res);
+            using (var res = dbContext.Read(sql))
+            {
+                res.Read();
+                dbContext.clearParams();
+                return LogCreator.CreateModel(res);
+            }
         }
         public string GetLastID() {
-            string sql = @"SELECT ID FROM LOGS ORDER BY ID ORD DESC LIMIT 1";
-            var res = dbContext.Read(sql);
-            return Convert.ToString(res[0]);
+            string sql = @"SELECT ID FROM LOGS ORDER BY ID DESC LIMIT 1";
+            using (var res = dbContext.Read(sql))
+            {  res.Read(); return Convert.ToString(res[0]); }
         }
         public bool Create(Log model) {
             string sql = @"INSERT INTO LOGS(TIMESTAMP, LOG_PATH) VALUES(@time, @path)";
@@ -333,15 +438,19 @@ namespace WebApplication2.Repositories
         public Offer GetById(string id) {
             string sql = @"SELECT * FROM OFFER WHERE ID=@ID";
             dbContext.addParameter("@ID", id);
-            var res = dbContext.Read(sql);
-            dbContext.clearParams();
-            return OfferCreator.CreateModel(res);
+            using (var res = dbContext.Read(sql))
+            {
+                res.Read();
+                dbContext.clearParams();
+                return OfferCreator.CreateModel(res);
+            }
+  
         }
         public string GetLastID()
         {
             string sql = @"SELECT ID FROM OFFER ORDER BY ID ORD DESC LIMIT 1";
-            var res = dbContext.Read(sql);
-            return Convert.ToString(res[0]);
+            using (var res = dbContext.Read(sql))
+            {  res.Read(); return Convert.ToString(res[0]); }
         }
         public bool Create(Offer model) {
             string sql = @"INSERT INTO OFFER(AUTHOR_ID, SELLER_ID, JOB_ID, NEW_PRICE, NEW_CHAT_ID) VALUES(@author, @seller, @job, @price, @chatId)";
