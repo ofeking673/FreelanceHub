@@ -4,6 +4,8 @@ using System.Data.Entity;
 using System.Data.SqlTypes;
 using System.Diagnostics.Metrics;
 using System.Reflection.PortableExecutable;
+using System.Security.Cryptography;
+using System.Text;
 using WebApplication2.ModelCreators;
 
 namespace WebApplication2.Repositories
@@ -13,7 +15,18 @@ namespace WebApplication2.Repositories
         public UserRespository() : base(dbContext:DBActions.DBConnection.getInstance())
         { }
 
+        public string hashPass(string password)
+        {
+            var inputBytes = Encoding.UTF8.GetBytes(password);
+            var inputHash = SHA256.HashData(inputBytes);
+            return Convert.ToHexString(inputHash);
+        }
 
+        public string getCookie(User user)
+        {
+            string cookie = $"{user.Id}|{user.Username}|{user.PasswordHash}";
+            return hashPass(cookie);
+        }
         public List<User> GetAll() {
             string sql = @"SELECT * FROM USER";
             var results = new List<User>();
@@ -41,7 +54,7 @@ namespace WebApplication2.Repositories
 
         public User GetByUserAndPassword(string username, string password)
         {
-            string sql = @"SELECT * FROM USER WHERE USERNAME=@user AND PASSWORD=@pass";
+            string sql = @"SELECT * FROM USER WHERE USERNAME=@user AND PASSWORD_HASH=@pass";
             dbContext.addParameter("@user", username);
             dbContext.addParameter("@pass", password);
             using (var res = dbContext.Read(sql)) {

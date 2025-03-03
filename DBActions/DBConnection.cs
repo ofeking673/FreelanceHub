@@ -26,7 +26,8 @@ namespace WebApplication2.DBActions
         }
         private DBConnection()
         {
-            connectionStr = "Data Source=C:\\Users\\Magshimim\\FreelanceHub\\WebApp\\App_Data\\test.sqlite";
+            connectionStr = $"Data Source={Path.Combine(Directory.GetCurrentDirectory(), "DBActions\\test.sqlite")}";
+            Console.WriteLine(connectionStr);
             conn = new SQLiteConnection(connectionStr);
             cmd.Connection = conn;
         }

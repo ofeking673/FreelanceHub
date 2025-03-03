@@ -9,6 +9,6 @@ namespace AlexProject.ViewModels
 {
     public class AdView
     {
-        Ad ad { get; set; }
+        public Job job { get; set; }
     }
 }

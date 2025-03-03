@@ -9,6 +9,6 @@ namespace AlexProject.ViewModels
 {
     public class OpenChat
     {
-        Chat chat { get; set; }
+        public Chat chat { get; set; }
     }
 }

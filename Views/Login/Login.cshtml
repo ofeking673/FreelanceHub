@@ -1,0 +1,140 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Signup</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        .form-container input {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container" id="formContainer">
+            <h2 id="formTitle">Login</h2>
+            <form id="authForm"
+                  method="post"
+                  action="https://localhost:7159/api/Guest/login"
+                  enctype="multipart/form-data">
+                <input type="text" id="username" name="Username" placeholder="Username" required>
+                <input type="password" id="password" name="PasswordHash" placeholder="Password" required>
+                <input type="email" id="email" name="Email" placeholder="Email" class="hidden">
+                <input type="file" id="fileInput" name="pfpStream" placeholder="Profile picture" accept="image/*" class="hidden">
+                <button type="submit">Submit</button>
+            </form>
+            <p id="toggleText">Don't have an account? <a href="javascript:void(0);" id="toggleForm">Sign up</a></p>
+        </div>
+    </div>
+    <script>
+        async function foo(event) {
+            event.preventDefault();
+
+            var formdata = new FormData();
+            formdata.append("Username", document.getElementById("username").value);
+            formdata.append("PasswordHash", document.getElementById("password").value);
+
+            if (document.getElementById("formTitle").textContent == "Sign Up") {
+                formdata.append("Email", document.getElementById("email").value);
+                formdata.append("pfpStream", document.getElementById("fileInput").files[0]);
+            }
+
+            try {
+                let response = await fetch(document.getElementById("authForm").action, {
+                    method: 'POST',
+                    body: formdata
+                })
+                
+                let text = await response.text();
+                console.log(text);
+
+                localStorage.setItem("user", text);
+
+                if (response.ok) {
+                    window.location.href = "https://localhost:7159/Ads/GetAdHub";
+                }
+            }
+            catch (error) 
+            {
+                console.log(error);
+                return;
+            }
+            document.getElementById("authForm").addEventListener('submit', foo);
+        }
+        document.getElementById("authForm").addEventListener('submit', foo);
+
+    </script>
+    <script>
+        // Function to toggle between login and signup modes
+        function toggleFormMode() {
+            const formTitle = document.getElementById('formTitle');
+            const authForm = document.getElementById('authForm');
+            const emailInput = document.getElementById('email');
+            const fileInput = document.getElementById('fileInput');
+            const toggleText = document.getElementById('toggleText');
+            const toggleForm = document.getElementById('toggleForm');
+
+            if (formTitle.textContent === "Login") {
+                formTitle.textContent = "Sign Up";
+                authForm.action = "https://localhost:7159/api/Guest/signup";
+                emailInput.classList.remove('hidden');
+                emailInput.setAttribute("required", "required");
+                fileInput.classList.remove('hidden');
+                fileInput.setAttribute("required", "required");
+                toggleText.innerHTML = `Already have an account? <a href="javascript:void(0);" id="toggleForm">Log in</a>`;
+            } else {
+                formTitle.textContent = "Login";
+                authForm.action = "https://localhost:7159/api/Guest/login";
+                emailInput.classList.add('hidden');
+                emailInput.removeAttribute("required");
+                fileInput.classList.add('hidden');
+                fileInput.removeAttribute("required");
+                toggleText.innerHTML = `Don't have an account? <a href="javascript:void(0);" id="toggleForm">Sign up</a>`;
+            }
+
+            // Re-bind the event listener for the toggle link to ensure it switches correctly
+            document.getElementById('toggleForm').addEventListener('click', toggleFormMode);
+        }
+        document.getElementById('toggleForm').addEventListener('click', toggleFormMode);
+    </script>
+</body>
+</html>

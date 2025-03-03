@@ -177,20 +177,31 @@
 </head>
 <body>
     <header>
-        <img src= "~/logo.png">
+        <img src="\logo.png">
     </header>
 
     <div class="container">
         <div class="search-bar">
             <input type="text" placeholder="Search for jobs or services...">
-            <select>
-                <option value="all">All Categories</option>
-                <option value="writing">Writing</option>
-                <option value="design">Design</option>
-                <option value="programming">Programming</option>
-                <option value="marketing">Marketing</option>
+            <select id="filter">
+                <option>Filter</option>
+                @foreach (var x in Model.themes)
+                {
+                    <option value="@x.ToString()">@x.ToString()</option>
+                }
             </select>
         </div>
+        <script>
+            document.getElementById("filter").addEventListener('change', async function () {
+                const select = document.getElementById("filter");
+                let filter = select.options[select.selectedIndex].text;
+                let currentUrl = new URL(window.location);
+
+                currentUrl.searchParams.set("Theme", filter);
+               
+                window.location.href = currentUrl;
+            });
+        </script>
 
         <div class="job-list">
             <p class="error" hidden></p>

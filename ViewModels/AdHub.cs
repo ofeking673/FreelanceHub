@@ -9,7 +9,9 @@ namespace AlexProject.ViewModels
 {
     public class AdHub //exists to show all ads
     {
-        Theme sortingTheme { get; set; }
-        List<Job> adList { get; set; }
+        public Theme sortingTheme { get; set; }
+        public List<Theme> themes { get; set; }
+        public List<Job> adList { get; set; }
+        public int Page {  get; set; }
     }
 }

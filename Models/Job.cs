@@ -8,7 +8,16 @@ public enum Theme
 {
     Teaching,
     Drawing,
-    Coding
+    Web,
+    Game,
+    Programming,
+    Mobile,
+    Video,
+    Illustration,
+    Marketing,
+    Content,
+    Modeling,
+    None
 }
 
 namespace AlexProject.Models

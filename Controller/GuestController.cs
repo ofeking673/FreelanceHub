@@ -26,15 +26,20 @@ namespace WebApplication2.Controllers
 
         [HttpGet("getAds")]
         public AdHub GetAds(int page=0, string theme = "None", 
-            int amountPerPage=5)
+            int amountPerPage=9)
         {
             try
             {
                 if (page < 0 || amountPerPage < 0) return null;
                 AdHub adHub = new AdHub();
                 adHub.sortingTheme = (Theme)Enum.Parse(typeof(Theme), theme);
-                
+
+
                 _DbContext.openConnection();
+                List<Job> jobList = factory.jobCreator.GetAll();
+                List<Theme> themes = jobList.Select(x => x.Theme).Distinct().ToList();
+                adHub.themes = themes;
+
                 List<Job> jobs = factory.jobCreator.GetByTheme(adHub.sortingTheme);
                 adHub.adList = jobs.GetRange(Math.Min(page * amountPerPage, Math.Max(jobs.Count - amountPerPage, 0)), Math.Min(amountPerPage, jobs.Count));
 
@@ -52,7 +57,7 @@ namespace WebApplication2.Controllers
         }
 
         [HttpGet("getCreator")]
-        public AdHub getCreator(int creatorId=-1, int page=0,
+        public AdHub GetCreator(int creatorId=-1, int page=0,
             int amtPerPage=5)
         {
             try
@@ -77,13 +82,14 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost("login")]
-        public User Login(string username, string passwordHash)
+        public string Login([FromForm] string Username, [FromForm] string PasswordHash)
         {
             try
             {
+                PasswordHash = factory.userCreator.hashPass(PasswordHash);
                 _DbContext.openConnection();
-                return factory.userCreator.GetByUserAndPassword(username, passwordHash);
-            } catch(Exception ex)
+                return factory.userCreator.getCookie(factory.userCreator.GetByUserAndPassword(Username, PasswordHash));
+            } catch(Exception)
             {
                 return null;
             }
@@ -92,21 +98,39 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost("signup")]
-        public User SignUp(string username, string passwordHash, string email, string profilePictureLink="") {
+        public async Task<string> SignUp([FromForm] User user, [FromForm] IFormFile pfpStream) {
             try
             {
+                user.PasswordHash = factory.userCreator.hashPass(user.PasswordHash);
                 _DbContext.openConnection();
-                User user = new User() { Email = email, PasswordHash = passwordHash, Username = username, ProfilePictureLink = profilePictureLink };
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\uploads\\UserProfiles");
+                if (!Directory.Exists(path)) { Directory.CreateDirectory(path); }
+                path = Path.Combine(path, $"{user.Username}_{pfpStream.FileName}");
+                user.ProfilePictureLink = path;
+
+                using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write))
+                {
+                    await pfpStream.CopyToAsync(fileStream);
+                };
+
+                 //Write file to folder at username|filename.extension
                 factory.userCreator.Create(user);
                 user.Id = int.Parse(factory.userCreator.GetLastID());
 
-                return user;
+                return factory.userCreator.getCookie(user);
             }
             catch (Exception ex)
             {
                 return null;
             }
             finally { _DbContext.closeConnection(); }
+        }
+
+        [HttpPost("verifyCookie")]
+        public bool VerifyCookie(string cookie)
+        {
+
+            return true;
         }
     }
 }

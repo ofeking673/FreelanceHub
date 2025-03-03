@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Microsoft.AspNetCore.Mvc;
-using System.Web.Mvc.Ajax;
 using WebApplication2.Serializer;
 using AlexProject.ViewModels;
 using System.Net;
 
-namespace WebApplication2.Controllers
+namespace WebApplication2.WebApp.WebControllers
 {
     public class AdsController : Controller
     {
@@ -19,7 +18,7 @@ namespace WebApplication2.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAdHub(string theme, int page=0)
+        public IActionResult GetAdHub(string theme ="None", int page = 0)
         {
             WebService<AdHub> client = new WebService<AdHub>()
             {
@@ -34,8 +33,9 @@ namespace WebApplication2.Controllers
             AdHub adHub = new AdHub();
             try
             {
-                 adHub = client.Get();
-            }catch(Exception ex)
+                adHub = client.Get();
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
